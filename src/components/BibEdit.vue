@@ -10,11 +10,13 @@ import { EditorState } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 
 import { usePublishStore } from '@/stores/publish'
+import { usePdfStore } from '@/stores/pdf'
 
 export default {
   name: 'BibEditor',
   setup() {
     const publishStore = usePublishStore()
+    const pdfStore = usePdfStore()
     const editorContainer = ref(null)
     const errors = ref([])
     let editorView = null
@@ -23,6 +25,7 @@ export default {
       const state = EditorState.create({
         doc: '',
         extensions: [
+          EditorView.lineWrapping,
           EditorView.updateListener.of((v) => {
             if (v.docChanged) {
               publishStore.setBibContent(v.state.doc.toString())
@@ -34,8 +37,24 @@ export default {
 
       editorView = new EditorView({
         state,
-        // parent: editorContainer.value,
+        parent: editorContainer.value,
       })
+
+      pdfStore.$subscribe(
+        async (storeState) => {
+          if (storeState.events.key === 'doi' && storeState.events.newValue != '') {
+            const response = await await fetch('https://doi.org/' + storeState.events.newValue, {
+              method: 'GET',
+              headers: { Accept: 'application/x-bibtex; charset=utf-8' },
+            })
+            const bib = await response.text()
+            editorView.dispatch({
+              changes: { from: 0, to: state.doc.length, insert: bib },
+            })
+          }
+        },
+        { flush: 'sync' },
+      )
     }
 
     onMounted(() => {

@@ -4,6 +4,7 @@ export const usePdfStore = defineStore('pdfStore', {
   state: () => ({
     pdfContent: new Uint8Array([]),
     pageNum: 0,
+    doi: '',
     overlayActive: false,
   }),
   actions: {
@@ -12,6 +13,13 @@ export const usePdfStore = defineStore('pdfStore', {
         this.pdfContent = newPdfContent
       } else {
         console.error('Data must be an instance of Uint8Array')
+      }
+    },
+    setDoi(newDoi: string) {
+      if (typeof newDoi === 'string') {
+        this.doi = newDoi
+      } else {
+        console.error('Data must be an instance of string')
       }
     },
     setPageNum(newPageNum: number) {

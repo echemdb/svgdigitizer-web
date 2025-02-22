@@ -93,7 +93,17 @@ const sendPageSvgedit = () => {
 onMounted(async () => {
   const loadingTask = pdfjsLib.getDocument({ data: pdfStore.pdfContent.slice() }) // buffer is consumed
   const pdfDoc = await loadingTask.promise
+
   renderPages(pdfDoc)
+  const doiRegex = /10\.\d{4,9}\/[-._;()/:a-zA-Z0-9]+/g
+  const textItems = await (await pdfDoc.getPage(1)).getTextContent()
+
+  textItems.items.forEach((text) => {
+    const matches = text.str.match(doiRegex)
+    if (matches) {
+      pdfStore.setDoi(matches[0])
+    }
+  })
 })
 </script>
 
