@@ -28,3 +28,7 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+# pixi environments
+.pixi
+*.egg-info
