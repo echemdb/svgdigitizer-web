@@ -8,7 +8,8 @@ import { ref, onMounted } from 'vue'
 
 import { basicSetup } from 'codemirror'
 import { EditorState } from '@codemirror/state'
-import { EditorView, gutter } from '@codemirror/view'
+import { EditorView, gutter, keymap } from '@codemirror/view'
+import { indentWithTab } from '@codemirror/commands'
 
 import { lintGutter } from '@codemirror/lint'
 import { yaml } from '@codemirror/lang-yaml'
@@ -26,7 +27,7 @@ export default {
     const publishStore = usePublishStore()
     const editorContainer = ref(null)
     const errors = ref([])
-    // const editorView = null
+    const editorView = null
 
     const initializeEditor = (schema) => {
       const state = EditorState.create({
@@ -42,6 +43,7 @@ export default {
           basicSetup,
           yaml(),
           yamlSchema(schema),
+          keymap.of([indentWithTab]),
         ],
       })
 
@@ -52,17 +54,20 @@ export default {
     }
 
     onMounted(async () => {
-      const schema = await await (
-        await fetch(
-          'https://raw.githubusercontent.com/echemdb/metadata-schema/main/schemas/svgdigitizer.json',
-        )
-      ).json()
+      const schema = await await (await fetch('/dereferenced-schema.json')).json()
       // console.log(schema)
       // await $RefParser.dereference(schema)
+      // await $RefParser.dereference(
+      //   '/metadata-schema/main/schemas/svgdigitizer.json',
+      // )
+      // const schema = await $RefParser.dereference('/metadata-schema/schemas/svgdigitizer.json', {
+      //   dereference: { circular: false },
+      // })
+      // console.log(JSON.stringify(schema, null, 2))
       // console.log(schema)
       // const parser = new $RefParser()
       // parser.dereference(
-      //   'https://raw.githubusercontent.com/echemdb/metadata-schema/main/schemas/svgdigitizer.json',
+      //   '/metadata-schema/main/schemas/svgdigitizer.json',
       // )
       // console.log(parser.schema)
       initializeEditor(schema)
