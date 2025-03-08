@@ -1,0 +1,14 @@
+{
+  "author": "{{ authors }}",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {},
+  "description": "A template for kick starting a Cloudflare Workers project",
+  "main": "./index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.114.0"
+  }
+}
