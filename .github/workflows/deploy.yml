@@ -26,10 +26,8 @@ jobs:
           FOLDER: dist
         if: ${{ github.event_name == 'push' }}
       - name: Deploy to Cloudflare
-        run: |
-          cd pr-electrochemistry-data
-          curl -X POST "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/workers/scripts/pr-electrochemistry-data/assets-upload-session" \
-          -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-          -H "Content-Type: application/javascript" \
-          --data-binary "@worker.js"
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: 'pr-electrochemistry-data'
         if: ${{ github.event_name == 'push' }}

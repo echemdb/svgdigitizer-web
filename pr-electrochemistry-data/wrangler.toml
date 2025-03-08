@@ -1,0 +1,9 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "pr-electrochemistry-data"
+workers_dev = true
+compatibility_date = "2025-03-03"
+main = "worker.js"
+keep_vars = true
+
+[observability]
+enabled = true
