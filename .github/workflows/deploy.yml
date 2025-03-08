@@ -25,3 +25,11 @@ jobs:
           BRANCH: gh-pages
           FOLDER: dist
         if: ${{ github.event_name == 'push' }}
+      - name: Deploy to Cloudflare
+        run: |
+          cd pr-electrochemistry-data
+          curl -X PUT "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/workers/scripts/pr-electrochemistry-data" \
+          -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+          -H "Content-Type: application/javascript" \
+          --data-binary "@worker.js"
+        if: ${{ github.event_name == 'push' }}
