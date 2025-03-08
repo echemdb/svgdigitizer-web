@@ -17,9 +17,9 @@ export default {
   setup() {
     const publishStore = usePublishStore()
     const pdfStore = usePdfStore()
-    const editorContainer = ref(null)
+    const editorContainer = ref<HTMLDivElement>()
     const errors = ref([])
-    let editorView = null
+    let editorView: EditorView
 
     const initializeEditor = () => {
       const state = EditorState.create({
@@ -41,9 +41,9 @@ export default {
       })
 
       pdfStore.$subscribe(
-        async (storeState) => {
-          if (storeState.events.key === 'doi' && storeState.events.newValue != '') {
-            const response = await await fetch('https://doi.org/' + storeState.events.newValue, {
+        async (mutation, storeState) => {
+          if (storeState.doi && storeState.doi !== '') {
+            const response = await fetch('https://doi.org/' + storeState.doi, {
               method: 'GET',
               headers: { Accept: 'application/x-bibtex; charset=utf-8' },
             })
@@ -53,7 +53,7 @@ export default {
             })
           }
         },
-        { flush: 'sync' },
+        { flush: 'post' },
       )
     }
 

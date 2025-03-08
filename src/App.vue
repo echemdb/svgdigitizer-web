@@ -4,7 +4,7 @@ import SvgEditor from './components/SvgEditor.vue'
 import PdfViewer from './components/PdfViewer.vue'
 import YamlEditor from './components/YamlEdit.vue'
 import BibEditor from './components/BibEdit.vue'
-import Publish from './components/Publish.vue'
+import PublishPr from './components/PublishPr.vue'
 import { usePdfStore } from '@/stores/pdf'
 import { usePublishStore } from '@/stores/publish'
 const pdfStore = usePdfStore()
@@ -14,14 +14,14 @@ const leftWidth = ref(300)
 let startX = 0
 let startWidth = 0
 
-const startResize = (event) => {
+const startResize = (event: MouseEvent) => {
   startX = event.clientX
   startWidth = leftWidth.value
   document.addEventListener('mousemove', resize)
   document.addEventListener('mouseup', stopResize)
 }
 
-const resize = (event) => {
+const resize = (event: MouseEvent) => {
   leftWidth.value = Math.max(100, startWidth + (event.clientX - startX))
 }
 
@@ -52,7 +52,7 @@ const stopResize = () => {
     <PdfViewer />
   </div>
   <div v-if="publishStore.overlayActive" class="overlay-custom">
-    <Publish />
+    <PublishPr />
   </div>
 </template>
 

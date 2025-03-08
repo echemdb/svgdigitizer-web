@@ -3,7 +3,7 @@
   <div ref="editorContainer" class="editor"></div>
 </template>
 
-<script>
+<script lang="ts">
 import { ref, onMounted } from 'vue'
 
 import { basicSetup } from 'codemirror'
@@ -14,22 +14,25 @@ import { indentWithTab } from '@codemirror/commands'
 import { lintGutter } from '@codemirror/lint'
 import { yaml } from '@codemirror/lang-yaml'
 import { yamlSchema } from 'codemirror-json-schema/yaml'
+import type { JSONSchema7 } from 'json-schema'
 
+import { load as yamlLoad, dump as yamlDump } from 'js-yaml'
 import { usePublishStore } from '@/stores/publish'
 
-// import $RefParser from '@apidevtools/json-schema-ref-parser'
-// import { Buffer } from 'buffer'
-// globalThis.Buffer = Buffer
+import $RefParser from '@apidevtools/json-schema-ref-parser'
+import { Buffer } from 'buffer'
+
+window.Buffer = Buffer
 
 export default {
   name: 'YamlEditor',
   setup() {
     const publishStore = usePublishStore()
-    const editorContainer = ref(null)
+    const editorContainer = ref<HTMLDivElement>()
     const errors = ref([])
-    const editorView = null
+    let editorView: EditorView
 
-    const initializeEditor = (schema) => {
+    const initializeEditor = (schema: JSONSchema7) => {
       const state = EditorState.create({
         doc: '',
         extensions: [
@@ -47,30 +50,48 @@ export default {
         ],
       })
 
-      new EditorView({
+      editorView = new EditorView({
         state,
         parent: editorContainer.value,
       })
+      // console.log(editorContainer.value.offsetWidth)
+      // editorView.setSize(editorContainer.value.offsetWidth + 'px', 'auto')
+      populateTemplate()
+    }
+
+    const populateTemplate = async () => {
+      const response = await fetch('/template.yaml')
+      const yaml = await response.text()
+
+      try {
+        const doc = yamlLoad(yaml, 'utf8')
+        const curatorStr = localStorage.getItem('curator')
+        if (curatorStr) {
+          const curator = JSON.parse(curatorStr)
+          for (const key in curator) {
+            doc.curation.process[0][key] = curator[key]
+          }
+        }
+
+        doc.curation.process[0]['date'] = new Date().toISOString().substring(0, 10)
+
+        editorView.dispatch({
+          changes: { from: 0, to: editorView.state.doc.length, insert: yamlDump(doc, 'utf8') },
+        })
+      } catch (e) {
+        console.log(e)
+      }
     }
 
     onMounted(async () => {
-      const schema = await await (await fetch('/dereferenced-schema.json')).json()
-      // console.log(schema)
-      // await $RefParser.dereference(schema)
-      // await $RefParser.dereference(
-      //   '/metadata-schema/main/schemas/svgdigitizer.json',
-      // )
-      // const schema = await $RefParser.dereference('/metadata-schema/schemas/svgdigitizer.json', {
-      //   dereference: { circular: false },
-      // })
-      // console.log(JSON.stringify(schema, null, 2))
-      // console.log(schema)
-      // const parser = new $RefParser()
-      // parser.dereference(
-      //   '/metadata-schema/main/schemas/svgdigitizer.json',
-      // )
-      // console.log(parser.schema)
-      initializeEditor(schema)
+      const schema = await $RefParser.dereference(
+        'https://raw.githubusercontent.com/echemdb/metadata-schema/main/schemas/svgdigitizer.json',
+        {
+          dereference: { circular: false },
+          // basepath: '/schemas',
+        },
+      )
+      initializeEditor(schema as JSONSchema7)
     })
 
     return {

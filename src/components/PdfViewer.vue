@@ -10,7 +10,7 @@
       />
     </div>
     <button class="close-btn" @click="closeGalleryOverlay">X</button>
-    <div v-if="overlayVisible" class="page-overlay" @click="closeOverlay">
+    <div v-if="overlayVisible" class="page-overlay" @click="closePageOverlay">
       <div class="page-overlay-content" @click.stop>
         <div
           ref="pageOverlayCanvasContainer"
@@ -24,23 +24,25 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
 import * as pdfjsLib from 'pdfjs-dist'
 import pdfWorker from 'pdfjs-dist/build/pdf.worker?url'
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker
 import { usePdfStore } from '@/stores/pdf'
 
+import type { RenderParameters, TextItem } from 'pdfjs-dist/types/src/display/api'
+
 const pdfStore = usePdfStore()
-const canvases = ref([])
-const canvasRefs = ref([])
-const selectedPageNum = ref(null)
-const overlayCanvas = ref(null)
+const canvases = ref<Array<HTMLCanvasElement>>([])
+const canvasRefs = ref<Array<HTMLCanvasElement>>([])
+const selectedPageNum = ref<number | undefined>()
+const overlayCanvas = ref<HTMLCanvasElement | null>(null)
 const overlayVisible = ref(false)
 const tooltipVisible = ref(false)
-const pageOverlayCanvasContainer = ref(null)
+const pageOverlayCanvasContainer = ref<HTMLDivElement>()
 
-const renderPages = async (pdfDoc) => {
+const renderPages = async (pdfDoc: pdfjsLib.PDFDocumentProxy) => {
   canvases.value = new Array(pdfDoc.numPages).fill(null)
 
   await nextTick()
@@ -52,26 +54,33 @@ const renderPages = async (pdfDoc) => {
       const viewport = page.getViewport({ scale: 1 })
       canvas.width = viewport.width
       canvas.height = viewport.height
+      if (ctx) {
+        const renderContext: RenderParameters = {
+          canvasContext: ctx,
+          viewport: viewport,
+        }
 
-      const renderContext = {
-        canvasContext: ctx,
-        viewport: viewport,
+        await page.render(renderContext).promise
       }
-
-      await page.render(renderContext).promise
     }
   })
 }
-const openOverlay = async (index) => {
+const openOverlay = async (index: number) => {
   selectedPageNum.value = index
   const originalCanvas = canvasRefs.value[index]
   if (originalCanvas) {
-    overlayCanvas.value = originalCanvas.cloneNode()
-    overlayCanvas.value.getContext('2d').drawImage(originalCanvas, 0, 0)
+    overlayCanvas.value = originalCanvas.cloneNode() as HTMLCanvasElement
+    const ctx = overlayCanvas.value.getContext('2d')
+    if (ctx !== null) {
+      ctx.drawImage(originalCanvas, 0, 0)
+    }
+
     overlayVisible.value = true
     await nextTick() // overlayVisible needs to take effect
-    pageOverlayCanvasContainer.value.innerHTML = ''
-    pageOverlayCanvasContainer.value.appendChild(overlayCanvas.value)
+    if (pageOverlayCanvasContainer.value) {
+      pageOverlayCanvasContainer.value.innerHTML = ''
+      pageOverlayCanvasContainer.value.appendChild(overlayCanvas.value)
+    }
   }
 }
 const showHoverTooltip = () => {
@@ -85,9 +94,12 @@ const closeGalleryOverlay = () => {
   pdfStore.toggleOverlay(false)
 }
 const sendPageSvgedit = () => {
-  pdfStore.setPageNum(selectedPageNum.value)
+  if (selectedPageNum.value) {
+    pdfStore.setPageNum(selectedPageNum.value)
+  }
+
   pdfStore.toggleOverlay(false)
-  svgEditor.svgCanvas.extensions['svgdigitizer'].loadPage()
+  window.svgEditor.svgCanvas.extensions['svgdigitizer'].loadPage()
 }
 
 onMounted(async () => {
@@ -99,7 +111,7 @@ onMounted(async () => {
   const textItems = await (await pdfDoc.getPage(1)).getTextContent()
 
   textItems.items.forEach((text) => {
-    const matches = text.str.match(doiRegex)
+    const matches = (text as TextItem).str.match(doiRegex)
     if (matches) {
       pdfStore.setDoi(matches[0])
     }

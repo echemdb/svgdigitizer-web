@@ -1,6 +1,7 @@
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import { usePublishStore } from '@/stores/publish'
+import { load as yamlLoad } from 'js-yaml'
 
 const publishStore = usePublishStore()
 const commitMessage = ref('')
@@ -19,7 +20,7 @@ const submitPullRequest = async () => {
   loading.value = true
   responseMessage.value = ''
 
-  const apiUrl = 'https://electrochemistry-data.linuxrider.workers.dev/'
+  const apiUrl = 'https://pr-electrochemistry-data.linuxrider.workers.dev/'
 
   const payload = {
     commitMessage: commitMessage.value,
@@ -43,11 +44,17 @@ const submitPullRequest = async () => {
       responseMessage.value = `❌ Error: ${result.error}`
     }
   } catch (error) {
-    responseMessage.value = `❌ Network error: ${error.message}`
+    const err = error as Error
+    responseMessage.value = `❌ Network error: ${err.message}`
   }
 
   loading.value = false
 }
+onMounted(() => {
+  const curator = yamlLoad(yamlFileContent.value, 'utf-8').curation.process[0]
+  console.log(curator)
+  localStorage.setItem('curator', JSON.stringify({ name: curator.name, orcid: curator.orcid }))
+})
 </script>
 
 <template>
