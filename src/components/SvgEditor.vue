@@ -10,15 +10,18 @@ import { onMounted } from 'vue'
 import 'svgedit/dist/editor/svgedit.css'
 
 onMounted(async () => {
-  const editor = new Editor(document.getElementById('svgeditor'))
-  editor.setConfig({
-    imgPath: '/node_modules/svgedit/dist/editor/images',
-    allowInitialUserOverride: true,
-    extensions: [],
-    noDefaultExtensions: true,
-    userExtensions: [{ pathName: '/ext-svgdigitizer/ext-svgdigitizer.js' }],
-  })
+  const container = document.getElementById('svgeditor')
+  if (container) {
+    const editor = new Editor(container)
+    editor.setConfig({
+      imgPath: '/node_modules/svgedit/dist/editor/images',
+      allowInitialUserOverride: true,
+      extensions: [],
+      noDefaultExtensions: true,
+      userExtensions: [{ pathName: '/ext-svgdigitizer/ext-svgdigitizer.js' }],
+    })
 
-  editor.init()
+    editor.init()
+  }
 })
 </script>
