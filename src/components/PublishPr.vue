@@ -20,7 +20,7 @@ const submitPullRequest = async () => {
   loading.value = true
   responseMessage.value = ''
 
-  const apiUrl = 'https://pr-electrochemistry-data.linuxrider.workers.dev/'
+  const apiUrl = 'https://pr-electrochemistry-data.echemdb.workers.dev/'
 
   const payload = {
     commitMessage: commitMessage.value,
