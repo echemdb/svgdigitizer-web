@@ -14,11 +14,16 @@ onMounted(async () => {
   if (container) {
     const editor = new Editor(container)
     editor.setConfig({
-      imgPath: '/node_modules/svgedit/dist/editor/images',
+      imgPath: 'assets/svgedit/images',
       allowInitialUserOverride: true,
       extensions: [],
       noDefaultExtensions: true,
-      userExtensions: [{ pathName: '/ext-svgdigitizer/ext-svgdigitizer.js' }],
+      userExtensions: [
+        {
+          pathName:
+            '/svgdigitizer-web/assets/svgedit/extensions/ext-svgdigitizer/ext-svgdigitizer.js',
+        },
+      ],
     })
 
     editor.init()

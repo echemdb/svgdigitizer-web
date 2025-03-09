@@ -60,7 +60,7 @@ export default {
     }
 
     const populateTemplate = async () => {
-      const response = await fetch('/template.yaml')
+      const response = await fetch('template.yaml')
       const yaml = await response.text()
 
       try {
