@@ -32,7 +32,7 @@ onMounted(async () => {
     await editor.init()
     await editor.addExtension(
       ExtSvgdigitizer.name,
-      ExtSvgdigitizer.init && ExtSvgdigitizer.init.bind(editor, editor.config),
+      ExtSvgdigitizer.init && ExtSvgdigitizer.init.bind(editor),
       {},
     )
   }
