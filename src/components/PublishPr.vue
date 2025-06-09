@@ -22,12 +22,23 @@ const submitPullRequest = async () => {
 
   const apiUrl = 'https://pr-electrochemistry-data.echemdb.workers.dev/'
 
+  const source = yamlFileContent.value.match(/citation key:\s*(\S+)/)
+
   const payload = {
     commitMessage: commitMessage.value,
     files: [
-      { filename: identifier.value + '.yaml', content: yamlFileContent.value },
-      { filename: identifier.value + '.bib', content: bibtexFileContent.value },
-      { filename: identifier.value + '.svg', content: svgFileContent.value },
+      {
+        filename: 'literature/svgdigitizer/' + source + '/' + identifier.value + '.yaml',
+        content: yamlFileContent.value,
+      },
+      {
+        filename: 'literature/svgdigitizer/' + source + '/' + source + '.bib',
+        content: bibtexFileContent.value,
+      },
+      {
+        filename: 'literature/svgdigitizer/' + source + '/' + identifier.value + '.svg',
+        content: svgFileContent.value,
+      },
     ],
   }
 
