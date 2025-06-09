@@ -23,6 +23,13 @@ const submitPullRequest = async () => {
 
   const apiUrl = 'https://pr-electrochemistry-data.echemdb.workers.dev/'
 
+
+  const match = yamlFileContent.value.match(/citation key:\s*(\S+)/)
+  let source = ''
+  if (match) {
+    source = match[1]
+  }
+
   const payload = {
     commitMessage: commitMessage.value,
     files: [
