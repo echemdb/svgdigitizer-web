@@ -10,6 +10,7 @@ const yamlFileContent = ref(publishStore.yamlContent)
 const bibtexFileContent = ref(publishStore.bibContent)
 const svgFileContent = ref(publishStore.svgContent)
 const responseMessage = ref('')
+const source = ref('')
 const loading = ref(false)
 
 const closeOverlay = () => {
@@ -33,15 +34,15 @@ const submitPullRequest = async () => {
     commitMessage: commitMessage.value,
     files: [
       {
-        filename: 'literature/svgdigitizer/' + source + '/' + identifier.value + '.yaml',
+        filename: 'literature/svgdigitizer/' + source.value + '/' + identifier.value + '.yaml',
         content: yamlFileContent.value,
       },
       {
-        filename: 'literature/svgdigitizer/' + source + '/' + source + '.bib',
+        filename: 'literature/svgdigitizer/' + source.value + '/' + source.value + '.bib',
         content: bibtexFileContent.value,
       },
       {
-        filename: 'literature/svgdigitizer/' + source + '/' + identifier.value + '.svg',
+        filename: 'literature/svgdigitizer/' + source.value + '/' + identifier.value + '.svg',
         content: svgFileContent.value,
       },
     ],
@@ -67,8 +68,11 @@ const submitPullRequest = async () => {
   loading.value = false
 }
 onMounted(() => {
-  const curator = yamlLoad(yamlFileContent.value, 'utf-8').curation.process[0]
+  const yaml = yamlLoad(yamlFileContent.value, 'utf-8')
+  const curator = yaml.curation.process[0]
   console.log(curator)
+  source.value = yaml.source['citation key']
+  identifier.value = source.value
   localStorage.setItem('curator', JSON.stringify({ name: curator.name, orcid: curator.orcid }))
 })
 </script>
