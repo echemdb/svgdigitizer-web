@@ -21,8 +21,8 @@ jobs:
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          BRANCH: gh-pages
-          FOLDER: dist
+          branch: gh-pages
+          folder: dist
         if: ${{ github.event_name == 'push' }}
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v3
